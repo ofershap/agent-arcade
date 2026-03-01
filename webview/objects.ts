@@ -344,12 +344,12 @@ export function createLamp(col: number, row: number): InteractiveObject {
 
 export function createDefaultObjects(): InteractiveObject[] {
   return [
-    createLamp(9, 0),
-    createWhiteboard(12, 1),
-    createDesk(3, 6),
-    createChair(4, 8),
-    createCoffeeMug(6, 6),
-    createPlant(1, 9),
-    createArcadeCabinet(16, 5),
+    createLamp(14, 0),
+    createWhiteboard(18, 0),
+    createDesk(4, 4),
+    createChair(5, 6),
+    createCoffeeMug(8, 4),
+    createPlant(1, 6),
+    createArcadeCabinet(25, 3),
   ];
 }

@@ -6,13 +6,9 @@ export class AgentArcadePanelProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = 'agentArcade.office';
 
   private view?: vscode.WebviewView;
-  private watcher: CursorWatcher;
+  private watcher?: CursorWatcher;
 
-  constructor(private readonly extensionUri: vscode.Uri) {
-    this.watcher = new CursorWatcher((status: ParsedStatus) => {
-      this.sendStatus(status);
-    });
-  }
+  constructor(private readonly extensionUri: vscode.Uri) {}
 
   resolveWebviewView(
     webviewView: vscode.WebviewView,
@@ -28,10 +24,23 @@ export class AgentArcadePanelProvider implements vscode.WebviewViewProvider {
 
     webviewView.webview.html = this.getHtml(webviewView.webview);
 
+    console.log('[Agent Arcade] Webview resolved, starting watcher');
+
+    this.watcher = new CursorWatcher((status: ParsedStatus) => {
+      this.sendStatus(status);
+    });
     this.watcher.start();
 
+    webviewView.webview.onDidReceiveMessage((msg) => {
+      if (msg.type === 'webviewReady') {
+        console.log('[Agent Arcade] Webview ready signal received');
+      }
+    });
+
     webviewView.onDidDispose(() => {
-      this.watcher.dispose();
+      console.log('[Agent Arcade] Webview disposed');
+      this.watcher?.dispose();
+      this.watcher = undefined;
     });
   }
 
@@ -58,19 +67,20 @@ export class AgentArcadePanelProvider implements vscode.WebviewViewProvider {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'nonce-${nonce}'; style-src 'unsafe-inline';">
   <style>
-    body {
-      margin: 0;
-      padding: 0;
-      background: #1e1e2e;
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 100%;
+      height: 100%;
+      background: #1a1a2e;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
       overflow: hidden;
     }
     #officeCanvas {
       image-rendering: pixelated;
       image-rendering: crisp-edges;
+      display: block;
     }
   </style>
 </head>
@@ -82,7 +92,7 @@ export class AgentArcadePanelProvider implements vscode.WebviewViewProvider {
   }
 
   dispose() {
-    this.watcher.dispose();
+    this.watcher?.dispose();
   }
 }
 

@@ -1,10 +1,8 @@
-import { OfficeState, Position } from './types';
-import { TILE_SIZE, floorTile, wallTile, renderSprite } from './sprites';
+import { OfficeState } from './types';
+import { TILE_SIZE, COLS, ROWS, floorTile, wallTile, renderSprite } from './sprites';
 import { renderCharacter } from './character';
 
-const COLS = 20;
-const ROWS = 12;
-const WALL_ROWS = 3;
+const WALL_ROWS = 2;
 
 export function renderOffice(ctx: CanvasRenderingContext2D, state: OfficeState, scale: number) {
   const tileS = TILE_SIZE * scale;
@@ -21,9 +19,8 @@ export function renderOffice(ctx: CanvasRenderingContext2D, state: OfficeState, 
     }
   }
 
-  // Wall base trim
   ctx.fillStyle = '#4a4a6e';
-  ctx.fillRect(0, WALL_ROWS * tileS - Math.ceil(scale), COLS * tileS, Math.ceil(scale * 2));
+  ctx.fillRect(0, WALL_ROWS * tileS - Math.ceil(scale * 0.5), COLS * tileS, Math.ceil(scale * 1.5));
 
   const sortable: { zY: number; render: () => void }[] = [];
 
@@ -55,7 +52,7 @@ export function renderOffice(ctx: CanvasRenderingContext2D, state: OfficeState, 
       const pw = obj.hitbox.w * tileS;
       const ph = obj.hitbox.h * tileS;
 
-      const glowAlpha = 0.2 + 0.1 * Math.sin(state.tick * 6);
+      const glowAlpha = 0.3 + 0.15 * Math.sin(state.tick * 6);
       ctx.strokeStyle = `rgba(255,255,100,${glowAlpha + 0.3})`;
       ctx.lineWidth = Math.max(2, scale * 1.5);
       ctx.shadowColor = 'rgba(255,255,100,0.6)';
@@ -74,11 +71,11 @@ export function renderOffice(ctx: CanvasRenderingContext2D, state: OfficeState, 
 }
 
 function renderParticles(ctx: CanvasRenderingContext2D, state: OfficeState, scale: number) {
-  ctx.globalAlpha = 0.15;
-  for (let i = 0; i < 5; i++) {
-    const x = ((state.tick * 8 + i * 73) % (COLS * TILE_SIZE)) * scale;
-    const y = ((Math.sin(state.tick * 0.5 + i * 1.7) * 0.5 + 0.5) * ROWS * TILE_SIZE) * scale;
-    const sz = (1 + Math.sin(state.tick + i) * 0.5) * scale;
+  ctx.globalAlpha = 0.12;
+  for (let i = 0; i < 6; i++) {
+    const x = ((state.tick * 6 + i * 97) % (COLS * TILE_SIZE)) * scale;
+    const y = ((Math.sin(state.tick * 0.4 + i * 1.3) * 0.5 + 0.5) * ROWS * TILE_SIZE) * scale;
+    const sz = (1 + Math.sin(state.tick * 0.8 + i) * 0.5) * scale;
     ctx.fillStyle = '#fff';
     ctx.beginPath();
     ctx.arc(x, y, sz, 0, Math.PI * 2);
@@ -86,13 +83,3 @@ function renderParticles(ctx: CanvasRenderingContext2D, state: OfficeState, scal
   }
   ctx.globalAlpha = 1;
 }
-
-export function tileToPixel(pos: Position, scale: number): { x: number; y: number } {
-  return {
-    x: pos.col * TILE_SIZE * scale,
-    y: pos.row * TILE_SIZE * scale,
-  };
-}
-
-export const OFFICE_COLS = COLS;
-export const OFFICE_ROWS = ROWS;

@@ -1,9 +1,9 @@
-import { OfficeState, AgentMessage, AgentActivity } from './types';
+import { OfficeState, AgentMessage } from './types';
 import { createDefaultObjects } from './objects';
 import { createCharacter, setActivity } from './character';
 import { startGameLoop } from './gameLoop';
 import { handleClick, updateHover } from './hitTest';
-import { TILE_SIZE } from './sprites';
+import { TILE_SIZE, COLS, ROWS } from './sprites';
 
 declare function acquireVsCodeApi(): {
   postMessage(msg: unknown): void;
@@ -12,10 +12,6 @@ declare function acquireVsCodeApi(): {
 };
 
 const vscode = acquireVsCodeApi();
-
-const COLS = 20;
-const ROWS = 12;
-
 const canvas = document.getElementById('officeCanvas') as HTMLCanvasElement;
 let scale = 3;
 
@@ -25,6 +21,7 @@ function resize() {
   const nativeW = COLS * TILE_SIZE;
   const nativeH = ROWS * TILE_SIZE;
   scale = Math.min(availW / nativeW, availH / nativeH);
+  if (scale < 1) scale = 1;
   canvas.width = Math.floor(nativeW * scale);
   canvas.height = Math.floor(nativeH * scale);
   canvas.style.width = canvas.width + 'px';
@@ -35,7 +32,7 @@ function resize() {
 
 const state: OfficeState = {
   objects: createDefaultObjects(),
-  character: createCharacter(4, 7),
+  character: createCharacter(7, 6),
   dimmed: false,
   tick: 0,
   agentStatus: null,
@@ -61,7 +58,6 @@ window.addEventListener('message', (e) => {
   const msg = e.data as AgentMessage;
   if (msg.type === 'agentStatus') {
     setActivity(state.character, msg.activity, msg.statusText ?? undefined);
-
     const whiteboard = state.objects.find(o => o.id === 'whiteboard');
     if (whiteboard && msg.statusText) {
       whiteboard.state.text = msg.statusText;
@@ -75,3 +71,5 @@ window.addEventListener('message', (e) => {
 window.addEventListener('resize', resize);
 resize();
 startGameLoop(canvas, state, () => scale);
+
+vscode.postMessage({ type: 'webviewReady' });

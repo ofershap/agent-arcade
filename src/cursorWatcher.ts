@@ -11,6 +11,7 @@ export class CursorWatcher implements vscode.Disposable {
   private transcriptsDir: string | null = null;
   private onStatusChange: (status: ParsedStatus) => void;
   private idleTimer: ReturnType<typeof setTimeout> | null = null;
+  private dirWatcher: fs.FSWatcher | null = null;
 
   constructor(onStatusChange: (status: ParsedStatus) => void) {
     this.onStatusChange = onStatusChange;
@@ -20,13 +21,23 @@ export class CursorWatcher implements vscode.Disposable {
     this.transcriptsDir = this.findTranscriptsDir(workspacePath);
     if (!this.transcriptsDir) {
       console.log('[Agent Arcade] No Cursor transcripts directory found');
+      console.log('[Agent Arcade] Workspace:', workspacePath || vscode.workspace.workspaceFolders?.[0]?.uri.fsPath);
       return;
     }
 
-    console.log('[Agent Arcade] Watching:', this.transcriptsDir);
-    this.scanExisting();
+    console.log('[Agent Arcade] Watching transcripts at:', this.transcriptsDir);
+    this.scanAll();
 
-    this.scanInterval = setInterval(() => this.scanForNew(), 3000);
+    try {
+      this.dirWatcher = fs.watch(this.transcriptsDir, { persistent: false }, () => {
+        this.scanAll();
+      });
+      this.watchers.push(this.dirWatcher);
+    } catch (e) {
+      console.log('[Agent Arcade] Cannot watch dir, falling back to polling');
+    }
+
+    this.scanInterval = setInterval(() => this.scanAll(), 2000);
   }
 
   private findTranscriptsDir(workspacePath?: string): string | null {
@@ -44,7 +55,10 @@ export class CursorWatcher implements vscode.Disposable {
 
     for (const candidate of candidates) {
       const transcriptsDir = path.join(cursorRoot, candidate, 'agent-transcripts');
-      if (fs.existsSync(transcriptsDir)) return transcriptsDir;
+      if (fs.existsSync(transcriptsDir)) {
+        console.log('[Agent Arcade] Found transcripts via candidate:', candidate);
+        return transcriptsDir;
+      }
     }
 
     const wsBase = path.basename(wsPath);
@@ -53,29 +67,17 @@ export class CursorWatcher implements vscode.Disposable {
       for (const entry of dirs) {
         if (!entry.isDirectory() || !entry.name.includes(wsBase)) continue;
         const transcriptsDir = path.join(cursorRoot, entry.name, 'agent-transcripts');
-        if (fs.existsSync(transcriptsDir)) return transcriptsDir;
+        if (fs.existsSync(transcriptsDir)) {
+          console.log('[Agent Arcade] Found transcripts via basename scan:', entry.name);
+          return transcriptsDir;
+        }
       }
     } catch { /* ignore */ }
 
     return null;
   }
 
-  private scanExisting() {
-    if (!this.transcriptsDir) return;
-
-    try {
-      const entries = fs.readdirSync(this.transcriptsDir, { withFileTypes: true });
-      for (const entry of entries) {
-        if (!entry.isDirectory()) continue;
-        const jsonlPath = path.join(this.transcriptsDir, entry.name, entry.name + '.jsonl');
-        if (fs.existsSync(jsonlPath)) {
-          this.watchFile(jsonlPath);
-        }
-      }
-    } catch { /* ignore */ }
-  }
-
-  private scanForNew() {
+  private scanAll() {
     if (!this.transcriptsDir) return;
 
     try {
@@ -84,26 +86,36 @@ export class CursorWatcher implements vscode.Disposable {
         if (!entry.isDirectory()) continue;
         const jsonlPath = path.join(this.transcriptsDir, entry.name, entry.name + '.jsonl');
         if (fs.existsSync(jsonlPath) && !this.filePositions.has(jsonlPath)) {
+          console.log('[Agent Arcade] New transcript found:', entry.name);
           this.watchFile(jsonlPath);
         }
+        if (this.filePositions.has(jsonlPath)) {
+          this.readNewContent(jsonlPath);
+        }
       }
-    } catch { /* ignore */ }
+    } catch (e) {
+      console.log('[Agent Arcade] Scan error:', e);
+    }
   }
 
   private watchFile(filePath: string) {
-    const stat = fs.statSync(filePath);
-    this.filePositions.set(filePath, stat.size);
-
     try {
-      const watcher = fs.watch(filePath, () => this.readNewContent(filePath));
+      const stat = fs.statSync(filePath);
+      this.filePositions.set(filePath, Math.max(0, stat.size - 500));
+
+      const watcher = fs.watch(filePath, { persistent: false }, () => {
+        this.readNewContent(filePath);
+      });
       this.watchers.push(watcher);
-    } catch {
-      fs.watchFile(filePath, { interval: 1000 }, () => this.readNewContent(filePath));
+
+      this.readNewContent(filePath);
+    } catch (e) {
+      console.log('[Agent Arcade] Watch error:', filePath, e);
     }
   }
 
   private readNewContent(filePath: string) {
-    const prevPos = this.filePositions.get(filePath) || 0;
+    const prevPos = this.filePositions.get(filePath) ?? 0;
     let stat;
     try {
       stat = fs.statSync(filePath);
@@ -111,37 +123,40 @@ export class CursorWatcher implements vscode.Disposable {
 
     if (stat.size <= prevPos) return;
 
-    const stream = fs.createReadStream(filePath, {
-      start: prevPos,
-      end: stat.size - 1,
-      encoding: 'utf-8',
-    });
+    try {
+      const buf = Buffer.alloc(stat.size - prevPos);
+      const fd = fs.openSync(filePath, 'r');
+      fs.readSync(fd, buf, 0, buf.length, prevPos);
+      fs.closeSync(fd);
+      this.filePositions.set(filePath, stat.size);
 
-    let buffer = '';
-    stream.on('data', (chunk: string) => { buffer += chunk; });
-    stream.on('end', () => {
-      this.filePositions.set(filePath, stat!.size);
+      const text = buf.toString('utf-8');
+      const lines = text.split('\n').filter(l => l.trim());
 
-      const lines = buffer.split('\n').filter(l => l.trim());
       for (const line of lines) {
         const status = parseTranscriptLine(line);
         if (status) {
+          console.log('[Agent Arcade] Activity:', status.activity, status.statusText);
           this.onStatusChange(status);
           this.resetIdleTimer();
         }
       }
-    });
+    } catch (e) {
+      console.log('[Agent Arcade] Read error:', e);
+    }
   }
 
   private resetIdleTimer() {
     if (this.idleTimer) clearTimeout(this.idleTimer);
     this.idleTimer = setTimeout(() => {
       this.onStatusChange({ activity: 'idle', statusText: null });
-    }, 5000);
+    }, 8000);
   }
 
   dispose() {
-    for (const w of this.watchers) w.close();
+    for (const w of this.watchers) {
+      try { w.close(); } catch {}
+    }
     this.watchers = [];
     if (this.scanInterval) clearInterval(this.scanInterval);
     if (this.idleTimer) clearTimeout(this.idleTimer);

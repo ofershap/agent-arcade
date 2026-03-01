@@ -21,6 +21,8 @@ const HA = '#4a3728';
 const SH = '#3b5dc9';
 
 export const TILE_SIZE = 16;
+export const COLS = 30;
+export const ROWS = 10;
 
 export const floorTile: SpriteData = (() => {
   const C1 = '#c0915e';
@@ -86,19 +88,25 @@ export const chairSprite: SpriteData = (() => {
 })();
 
 export const mugSprite1: SpriteData = (() => {
-  const s: SpriteData = Array.from({ length: 8 }, () => Array(8).fill(_));
-  for (let y = 2; y < 7; y++)
-    for (let x = 1; x < 6; x++)
-      s[y][x] = y === 2 || y === 6 || x === 1 || x === 5 ? WH : '#8B4513';
-  s[3][6] = WH; s[4][6] = WH; s[5][6] = WH;
-  s[3][7] = WH; s[5][7] = WH;
+  const s: SpriteData = Array.from({ length: 16 }, () => Array(16).fill(_));
+  for (let y = 5; y < 14; y++)
+    for (let x = 3; x < 11; x++)
+      s[y][x] = y === 5 || y === 13 || x === 3 || x === 10 ? WH : '#8B4513';
+  // Handle
+  for (let y = 6; y < 12; y++) s[y][11] = WH;
+  s[6][12] = WH; s[7][13] = WH; s[8][13] = WH; s[9][13] = WH; s[10][13] = WH; s[11][12] = WH;
+  // Coffee surface
+  for (let x = 4; x < 10; x++) s[6][x] = '#5c3317';
   return s;
 })();
 
 export const mugSprite2: SpriteData = (() => {
   const s: SpriteData = mugSprite1.map(r => [...r]);
-  s[0][2] = LGR; s[0][4] = LGR;
-  s[1][3] = LGR;
+  // Steam wisps
+  s[2][5] = LGR; s[2][8] = LGR;
+  s[1][6] = LGR; s[1][7] = LGR;
+  s[3][6] = LGR; s[3][9] = LGR;
+  s[0][7] = LGR;
   return s;
 })();
 
