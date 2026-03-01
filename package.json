@@ -1,0 +1,56 @@
+{
+  "name": "agent-arcade",
+  "displayName": "Agent Arcade",
+  "description": "A living pixel art office for your Cursor AI agent — watch it work, click things, discover easter eggs",
+  "version": "0.1.0",
+  "publisher": "ofershap",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ofershap/agent-arcade"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Other"],
+  "keywords": ["cursor", "agent", "pixel-art", "ai", "companion", "interactive"],
+  "activationEvents": ["*"],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "agentArcade.show",
+        "title": "Agent Arcade: Show Office"
+      }
+    ],
+    "viewsContainers": {
+      "panel": [
+        {
+          "id": "agentArcade",
+          "title": "Agent Arcade",
+          "icon": "$(game)"
+        }
+      ]
+    },
+    "views": {
+      "agentArcade": [
+        {
+          "type": "webview",
+          "id": "agentArcade.office",
+          "name": "Agent Arcade"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "build": "node esbuild.mjs",
+    "watch": "node esbuild.mjs --watch",
+    "package": "vsce package --allow-star-activation"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "esbuild": "^0.24.0",
+    "typescript": "^5.7.0",
+    "@vscode/vsce": "^3.0.0"
+  }
+}
