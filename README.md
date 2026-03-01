@@ -1,18 +1,34 @@
-# Agent Arcade - Pixel Art Office for Your Cursor AI Agent
+# Agent Arcade
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue.svg)](https://www.typescriptlang.org/)
 [![VS Code](https://img.shields.io/badge/Cursor-1.85+-007ACC.svg)](https://cursor.com)
 
-Your AI agent gets a tiny office. It sits at the desk when coding, wanders around on breaks, celebrates when builds pass. You can click things while you wait.
+A pixel art office that lives in your Cursor bottom panel. Your AI agent sits at a desk, types when it's coding, wanders around when it's idle, and celebrates when builds pass.
 
 ```
 Install → Open "Agent Arcade" tab in bottom panel → done
 ```
 
-> 27KB total. No paid assets, no frameworks, no config. Pure Canvas 2D pixel art drawn from code.
+> 27KB. No config. Every sprite drawn from code.
 
-![Agent Arcade pixel art office - AI agent working at desk, wandering idle, celebrating builds](assets/demo.gif)
+![Agent Arcade - pixel art office for Cursor AI agents](assets/demo.gif)
+
+---
+
+## Why This Exists
+
+AI coding tools right now are chat windows and terminal output. You send a message, wait, read the response. There's no sense of _presence_.
+
+I wanted something different. Not a dashboard, not analytics, not another way to monitor tokens or costs. Just a small, living thing in the corner of my screen that makes the wait feel less like waiting.
+
+The agent is writing code? The character walks to the desk and types. It's reading files? You see it. Build passed? Little jump. Then during the idle moments between tasks, the character gets a coffee, pets the office cat, browses the bookshelf. It has a life.
+
+Is it useful in any practical sense? No. But I catch myself glancing at it constantly, and it makes me smile every time. That's enough.
+
+There's also something interesting happening here. n8n didn't become popular just because it was a workflow tool. It became popular because you could *see* the workflow. Terminals are powerful but abstract. A character sitting at a desk typing is immediately obvious to anyone.
+
+Maybe the future of AI tooling isn't just better models. Maybe it's making the work visible.
 
 ---
 
@@ -51,9 +67,21 @@ Click any object while the agent is idle and the character walks over to it afte
 
 ---
 
+## Screenshots
+
+| Idle | Working | Celebrating |
+|---|---|---|
+| ![idle](assets/idle.png) | ![working](assets/working.png) | ![celebrating](assets/celebrate.png) |
+
+Lamp off:
+
+![dark mode](assets/dark.png)
+
+---
+
 ## Install
 
-### From source (current)
+### From source
 
 ```bash
 git clone https://github.com/ofershap/agent-arcade.git
@@ -75,9 +103,9 @@ Coming soon.
 
 ## How It Works
 
-Agent Arcade reads Cursor's JSONL agent transcripts at `~/.cursor/projects/<workspace>/agent-transcripts/`. It watches for file changes and infers what the agent is doing from the transcript content - writing, reading, running commands, searching, or idle.
+Agent Arcade reads Cursor's JSONL agent transcripts at `~/.cursor/projects/<workspace>/agent-transcripts/`. It watches for file changes and figures out what the agent is doing from the transcript content.
 
-No modification to Cursor is needed. It's read-only observation of transcript files that Cursor already writes.
+No modification to Cursor needed. Read-only, watches files Cursor already writes.
 
 ```
 Cursor writes JSONL transcript
@@ -90,6 +118,23 @@ postMessage to webview
     ↓
 Character walks to desk / wanders / celebrates
 ```
+
+---
+
+## Idle Behavior
+
+When the agent isn't working, the character cycles through activities on its own:
+
+- Standing and looking around
+- Walking to the coffee mug
+- Browsing the bookshelf (faces away from you)
+- Petting the cat
+- Playing the arcade cabinet
+- Stretching
+- Watering the plant
+- Getting water from the cooler
+
+Each activity has its own duration with some randomness so it doesn't feel robotic. The character walks between spots at a leisurely pace, and faster when heading to the desk for work.
 
 ---
 
@@ -115,35 +160,6 @@ webview/
 ```
 
 All sprites are generated procedurally in `sprites.ts` using `fill()` and `outline()` helpers on pixel arrays. No external image assets.
-
----
-
-## Idle Behavior
-
-When the agent isn't working, the character cycles through activities on its own:
-
-- Standing and looking around
-- Walking to the coffee mug
-- Browsing the bookshelf (faces away from you)
-- Petting the cat
-- Playing the arcade cabinet
-- Stretching (arms up)
-- Watering the plant
-- Getting water from the cooler
-
-Each activity has its own duration with some randomness so it doesn't feel robotic. The character walks between spots at a leisurely pace, and faster when heading to the desk for work.
-
----
-
-## Screenshots
-
-| Idle | Working | Celebrating |
-|---|---|---|
-| ![idle](assets/idle.png) | ![working](assets/working.png) | ![celebrating](assets/celebrate.png) |
-
-Lamp off:
-
-![dark mode](assets/dark.png)
 
 ---
 
