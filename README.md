@@ -18,17 +18,13 @@ Install → Open "Agent Arcade" tab in bottom panel → done
 
 ## Why This Exists
 
-AI coding tools right now are chat windows and terminal output. You send a message, wait, read the response. There's no sense of _presence_.
+I spend a lot of time staring at a blinking cursor while agents do their thing. Checking if it's still running. Scrolling up to see if something happened. Tab-switching between the chat and whatever else I'm doing. It's fine, but it's disorienting. There's no peripheral signal telling me what state the agent is in.
 
-I wanted something different. Not a dashboard, not analytics, not another way to monitor tokens or costs. Just a small, living thing in the corner of my screen that makes the wait feel less like waiting.
+I started thinking about how old-school games solved a version of this problem. Dwarf Fortress runs a whole economy in a grid of ASCII characters. The Sims made "person goes to desk and sits down" feel alive with nothing but pathfinding and a state machine. Tamagotchis kept people emotionally invested in a 32x16 pixel creature.
 
-The agent is writing code? The character walks to the desk and types. It's reading files? You see it. Build passed? Little jump. Then during the idle moments between tasks, the character gets a coffee, pets the office cat, browses the bookshelf. It has a life.
+So I made one for my IDE. A tiny character with a desk, a bookshelf, a cat, and an arcade cabinet. When the agent works, the character works. When the agent is idle, the character gets a coffee, pets the cat, browses the bookshelf. When a build passes, it jumps.
 
-Is it useful in any practical sense? No. But I catch myself glancing at it constantly, and it makes me smile every time. That's enough.
-
-There's also something interesting happening here. n8n didn't become popular just because it was a workflow tool. It became popular because you could *see* the workflow. Terminals are powerful but abstract. A character sitting at a desk typing is immediately obvious to anyone.
-
-Maybe the future of AI tooling isn't just better models. Maybe it's making the work visible.
+I don't need to check the terminal anymore. I just glance at the bottom panel. If the character is at the desk, things are happening. If it's wandering, the agent is done. Took me two days to stop noticing it consciously - now it's just part of the background, like music while you work.
 
 ---
 
@@ -138,7 +134,31 @@ Each activity has its own duration with some randomness so it doesn't feel robot
 
 ---
 
-## Project Structure
+## Tech Stack
+
+| Component | What |
+|---|---|
+| Extension host | VS Code / Cursor Extension API |
+| Rendering | Canvas 2D, requestAnimationFrame |
+| Sprites | Procedural pixel art (no external images) |
+| Build | esbuild, single-file bundle |
+| Language | TypeScript (strict) |
+
+---
+
+## Development
+
+```bash
+git clone https://github.com/ofershap/agent-arcade.git
+cd agent-arcade
+npm install
+npm run build          # one-shot build
+npm run watch          # rebuild on save
+```
+
+Press F5 in Cursor/VS Code to launch the Extension Development Host with the extension loaded.
+
+### Project structure
 
 ```
 src/
@@ -159,7 +179,7 @@ webview/
 └── types.ts              # TypeScript interfaces
 ```
 
-All sprites are generated procedurally in `sprites.ts` using `fill()` and `outline()` helpers on pixel arrays. No external image assets.
+All sprites are generated procedurally in `sprites.ts` using `fill()` and `outline()` helpers on pixel arrays. No external image assets needed.
 
 ---
 
