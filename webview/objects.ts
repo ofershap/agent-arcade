@@ -548,7 +548,7 @@ function createCoffeeMug(col: number, row: number): InteractiveObject {
 function createPhone(col: number, row: number): InteractiveObject {
   return {
     id: 'phone', sprites: [phoneSprite], position: { col, row },
-    hitbox: { w: 16, h: 14 }, zY: (row + 0.3) * TILE_SIZE,
+    hitbox: { w: 16, h: 14 }, zY: (row + 1.1) * TILE_SIZE,
     state: { ringing: false, ringTimer: 0 },
     onClick: (obj) => {
       obj.state.ringing = !(obj.state.ringing as boolean);
@@ -573,7 +573,7 @@ export function createDefaultObjects(): InteractiveObject[] {
     createWindow(3.8, 0.15),
     createDesk(1.5, 0.6),
     createChair(1.8, 1.3),
-    createPhone(1.6, 0.88),
+    createPhone(1.6, 1.0),
     createCoffeeMug(3, 0.85),
     createBookshelf(5.1, 0.2),
     createWaterCooler(4.5, 1.5),

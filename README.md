@@ -50,6 +50,15 @@ Glance at the bottom panel. Character at the desk? Things are happening. Charact
 
 ---
 
+## Why
+
+To watch someone work.
+To bother the cat.
+To stare at a guy who lives in your IDE tab.
+To know your agent is doing something without reading a log.
+
+---
+
 ## What You Actually See
 
 | Your agent is... | The office shows... |
@@ -125,6 +134,16 @@ The office appears as a tab in the bottom panel bar (next to Terminal, Output, e
 ## How It Knows What Your Agent Is Doing
 
 Works out of the box — no API keys, no patches, no config. The extension uses Cursor's [hooks API](https://docs.cursor.com/context/hooks) to react to every tool call, subagent spawn, and completion event in real time. Falls back to transcript file watching if hooks aren't available.
+
+---
+
+## FAQ
+
+**Does it use tokens / cost anything?**
+No. It doesn't talk to any AI model. It reacts to events Cursor already emits.
+
+**Does it slow down my agent?**
+No. The extension runs in a separate process. The agent doesn't know it exists.
 
 ---
 
