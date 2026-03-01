@@ -6,7 +6,7 @@
 
 <p align="center">
   Your AI agent writes your code, reads your files, runs your tests, and fixes your bugs.<br>
-  The least you can do is give it an office.
+  The least you can do is give it an <strong>office</strong>.
 </p>
 
 <p align="center">
