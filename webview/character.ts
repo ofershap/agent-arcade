@@ -10,7 +10,7 @@ const CELEBRATE_COL = 3;
 const CELEBRATE_ROW = 1.8;
 
 const WALK_SPEED_IDLE = 1.5;
-const WALK_SPEED_WORK = 3.0;
+const WALK_SPEED_WORK = 5.0;
 
 interface IdleWaypoint {
   col: number;
@@ -105,6 +105,9 @@ export function setActivity(char: CharacterState, activity: AgentActivity, statu
     idleActionTimer = 0;
     idleAction = '';
   } else if (activity !== 'walking') {
+    char.targetPosition = null;
+    idleAction = '';
+    idleActionTimer = 0;
     char.targetPosition = { col: DESK_COL, row: DESK_ROW };
   }
 }
