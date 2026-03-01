@@ -1,23 +1,81 @@
-# Contributing to Agent Arcade
+# Contributing to Cursor Office
 
 Pull requests welcome. Here's how to add things.
 
 ## Setup
 
 ```bash
-git clone https://github.com/ofershap/agent-arcade.git
-cd agent-arcade
+git clone https://github.com/ofershap/cursor-office.git
+cd cursor-office
 npm install
 npm run build
 ```
 
-Press F5 in Cursor/VS Code to launch the Extension Development Host with the extension loaded. Changes to `webview/` files require a rebuild (`npm run build`) and a reload of the dev host window.
+Press F5 in Cursor/VS Code to launch the Extension Development Host with the extension loaded. Changes to `webview/` or `plugins/` files require a rebuild (`npm run build`) and a reload of the dev host window.
 
-## Adding an Interactive Object
+## Plugins
 
-Every object in the office is an `InteractiveObject`. To add one, create a factory function in `webview/objects.ts` and add it to `createDefaultObjects()`.
+The `plugins/` folder is the home for self-contained office additions. Each plugin is a single `.ts` file that exports a factory function returning an `InteractiveObject`.
 
-### The interface
+```
+plugins/
+├── roomba.ts        ← reference plugin — a robot vacuum that cleans the office
+└── your-plugin.ts   ← your contribution goes here
+```
+
+The built-in Roomba plugin ([`plugins/roomba.ts`](plugins/roomba.ts)) is the reference implementation. It shows how to:
+- Define a sprite inline using `makeSprite`, `fill`, `outline`
+- Manage a multi-phase state machine (waiting → entering → cleaning → exiting → gone)
+- Animate movement, flipping, shadow, and particle effects
+- Handle clicks differently based on current state
+
+To add your own plugin:
+
+1. Create a file in `plugins/` (e.g. `plugins/disco-ball.ts`)
+2. Import what you need from `webview/types` and `webview/sprites`
+3. Export a factory function that returns an `InteractiveObject`
+4. Import and add it to `createDefaultObjects()` in `webview/objects.ts`
+
+### Plugin template
+
+```typescript
+import { InteractiveObject, SpriteData } from '../webview/types';
+import { TILE_SIZE, renderSprite, makeSprite, fill } from '../webview/sprites';
+
+const mySprite: SpriteData = (() => {
+  const s = makeSprite(12, 12);
+  fill(s, 2, 2, 9, 9, '#ff6644');
+  return s;
+})();
+
+export function createMyThing(col: number, row: number): InteractiveObject {
+  return {
+    id: 'my-thing',
+    sprites: [mySprite],
+    position: { col, row },
+    hitbox: { w: 12, h: 12 },
+    zY: (row + 0.5) * TILE_SIZE,
+    state: {},
+    onClick: () => '✨ You clicked it!',
+    render: (ctx, obj, _tick, scale) => {
+      const x = obj.position.col * TILE_SIZE * scale;
+      const y = obj.position.row * TILE_SIZE * scale;
+      renderSprite(ctx, mySprite, x, y, scale);
+    },
+  };
+}
+```
+
+Then in `webview/objects.ts`:
+
+```typescript
+import { createMyThing } from '../plugins/my-thing';
+
+// inside createDefaultObjects():
+createMyThing(3.5, 0.4),
+```
+
+## InteractiveObject Interface
 
 ```typescript
 interface InteractiveObject {
@@ -34,94 +92,45 @@ interface InteractiveObject {
 
 ### Fields
 
-- `id` - unique string, used for hit testing and click-to-attract
-- `sprites` - array of `SpriteData` (2D color arrays). Can be empty if you draw manually in `render`
-- `position` - `{ col, row }` in tile coordinates. The office is 6 columns wide, 3 rows tall. Row 0 is the back wall, row ~2.5 is the front
-- `hitbox` - width/height in pixels (not tiles). Gets scaled automatically
-- `zY` - y-sort value for depth ordering. Higher = rendered later (in front). Usually `(row + spriteHeightInTiles) * 32`
-- `state` - freeform object for your internal state (click counts, timers, toggles)
-- `onClick` - called when clicked. Return a string to show it as a speech bubble on the character, or `null` for no bubble
-- `render` - draw the object each frame. `tick` is seconds since start, `scale` is the current pixel scale
-
-### Example: a trophy
-
-```typescript
-export function createTrophy(col: number, row: number): InteractiveObject {
-  return {
-    id: 'trophy',
-    sprites: [trophySprite],
-    position: { col, row },
-    hitbox: { w: 12, h: 16 },
-    zY: (row + 0.5) * TILE_SIZE,
-    state: { shineTimer: 0 },
-    onClick: (obj) => {
-      obj.state.shineTimer = 2;
-      return '🏆 100 builds!';
-    },
-    render: (ctx, obj, tick, scale) => {
-      const x = obj.position.col * TILE_SIZE * scale;
-      const y = obj.position.row * TILE_SIZE * scale;
-      renderSprite(ctx, obj.sprites[0]!, x, y, scale);
-
-      if ((obj.state.shineTimer as number) > 0) {
-        obj.state.shineTimer = (obj.state.shineTimer as number) - 0.016;
-        const alpha = 0.5 * ((obj.state.shineTimer as number) / 2);
-        ctx.fillStyle = `rgba(255,255,200,${alpha})`;
-        ctx.beginPath();
-        ctx.arc(x + 6 * scale, y + 4 * scale, 8 * scale, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    },
-  };
-}
-```
-
-Then in `createDefaultObjects()`:
-
-```typescript
-createTrophy(3.5, 0.4),
-```
+- `id` — unique string, used for hit testing and click-to-attract
+- `sprites` — array of `SpriteData` (2D color arrays). Can be empty if you draw manually in `render`
+- `position` — `{ col, row }` in tile coordinates. The office is 6 columns wide, 3 rows tall. Row 0 is the back wall, row ~2.5 is the front
+- `hitbox` — width/height in pixels (not tiles). Gets scaled automatically
+- `zY` — y-sort value for depth ordering. Higher = rendered later (in front). Usually `(row + spriteHeightInTiles) * 32`
+- `state` — freeform object for your internal state (click counts, timers, toggles)
+- `onClick` — called when clicked. Return a string to show it as a speech bubble on the character, or `null` for no bubble
+- `render` — draw the object each frame. `tick` is seconds since start, `scale` is the current pixel scale
 
 ### Runtime registration
 
-Objects can also be registered at runtime via the global API:
+Objects can also be registered at runtime without modifying source:
 
 ```typescript
-window.agentArcade.registerObject(myObject);
-window.agentArcade.removeObject('trophy');
+window.cursorOffice.registerObject(myObject);
+window.cursorOffice.removeObject('my-thing');
 ```
 
-## Adding a Sprite
+## Sprites
 
-Sprites live in `webview/sprites.ts` as 2D arrays of hex color strings. Empty string = transparent pixel.
+Sprites are 2D arrays of hex color strings. Empty string = transparent pixel.
 
 ```typescript
-export const trophySprite: SpriteData = [
+const mySprite: SpriteData = [
   ['', '#ffd700', '#ffd700', ''],
   ['#ffd700', '#ffed4a', '#ffed4a', '#ffd700'],
   ['', '#daa520', '#daa520', ''],
-  ['', '#8b6914', '#8b6914', ''],
 ];
 ```
 
-Each row is a horizontal line of pixels. Use `renderSprite(ctx, sprite, x, y, scale)` to draw them.
+Helper functions from `webview/sprites`:
+- `makeSprite(w, h)` — creates a transparent sprite canvas
+- `fill(sprite, x1, y1, x2, y2, color)` — fills a rectangle
+- `outline(sprite, x1, y1, x2, y2, color)` — draws a rectangle border
+- `renderSprite(ctx, sprite, x, y, scale)` — draws a sprite to the canvas
 
-## Adding a Background
+## Backgrounds
 
-You can contribute custom office backgrounds (floor and wall themes). A background is a pair of render functions.
-
-### The interface
-
-```typescript
-interface BackgroundRenderer {
-  id: string;
-  name: string;
-  renderFloor: (ctx, cols, rows, wallRows, tileSize, scale, tick) => void;
-  renderWall: (ctx, cols, wallRows, tileSize, scale, tick) => void;
-}
-```
-
-### Example: concrete office
+Custom office backgrounds (floor and wall themes). Register via the global API.
 
 ```typescript
 const concreteBackground: BackgroundRenderer = {
@@ -143,23 +152,16 @@ const concreteBackground: BackgroundRenderer = {
   },
 };
 
-window.agentArcade.registerBackground(concreteBackground);
+window.cursorOffice.registerBackground(concreteBackground);
 ```
 
-The default background renders warm wood floors and blue-gray walls. Custom backgrounds replace both. Objects, character, lighting, and particles render on top of whatever background you provide.
+## Character attract
 
-## Making clickable objects work with attract
-
-If you want the character to walk to your object when it's clicked during idle, add an entry in `OBJECT_POSITIONS` in `webview/character.ts`:
+If you want the character to walk to your object when clicked during idle, add an entry in `OBJECT_POSITIONS` in `webview/character.ts`:
 
 ```typescript
-const OBJECT_POSITIONS: Record<string, { col: number; row: number; action: string }> = {
-  // ...existing entries
-  trophy: { col: 3.5, row: 1.2, action: 'lookAround' },
-};
+trophy: { col: 3.5, row: 1.2, action: 'lookAround' },
 ```
-
-The `col`/`row` is where the character stands when attracted. The `action` controls the facing direction and idle pose.
 
 ## Code style
 
@@ -171,6 +173,6 @@ The `col`/`row` is where the character stands when attracted. The `action` contr
 ## Submitting
 
 1. Fork the repo
-2. Create a branch (`git checkout -b add-trophy-object`)
+2. Create a file in `plugins/` (or modify existing code)
 3. Build and test locally (`npm run build`, F5 to test in dev host)
 4. Open a PR with a screenshot showing your addition in the office

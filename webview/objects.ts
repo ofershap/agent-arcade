@@ -1,7 +1,7 @@
 import { InteractiveObject, OfficeState } from './types';
 import { roundRect } from './canvas';
 import {
-  TILE_SIZE, deskSprite, chairSprite,
+  TILE_SIZE, COLS, deskSprite, chairSprite,
   plantStage1, plantStage2, plantStage3,
   windowSprite, arcadeCabinetSprite,
   lampSprite, lampSpriteOff,
@@ -9,6 +9,7 @@ import {
   catSprite1, catSprite2,
   renderSprite,
 } from './sprites';
+import { createRoomba } from '../plugins/roomba';
 
 function defaultRender(ctx: CanvasRenderingContext2D, obj: InteractiveObject, _tick: number, scale: number) {
   const sprite = obj.sprites[0];
@@ -233,7 +234,7 @@ function renderMiniGame(ctx: CanvasRenderingContext2D, game: number, tick: numbe
 export function createArcadeCabinet(col: number, row: number): InteractiveObject {
   return {
     id: 'arcade', sprites: [arcadeCabinetSprite], position: { col, row },
-    hitbox: { w: 28, h: 56 }, zY: (row + 2) * TILE_SIZE,
+    hitbox: { w: 28, h: 56 }, zY: (row + 1) * TILE_SIZE,
     state: { game: 0 },
     onClick: (obj) => {
       obj.state.game = ((obj.state.game as number) + 1) % 3;
@@ -556,5 +557,6 @@ export function createDefaultObjects(): InteractiveObject[] {
     createArcadeCabinet(0, 0.8),
     createPlant(5.2, 2),
     createCat(3, 1.8),
+    createRoomba(),
   ];
 }

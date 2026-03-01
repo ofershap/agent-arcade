@@ -136,7 +136,7 @@ function renderFloatingTexts(ctx: CanvasRenderingContext2D, state: OfficeState, 
 }
 
 function renderClickCounter(ctx: CanvasRenderingContext2D, state: OfficeState, scale: number) {
-  if (!state.clickCounter || state.clickCounter.count < 2) return;
+  if (!state.clickCounter || state.clickCounter.count < 5) return;
 
   const count = state.clickCounter.count;
   const sceneW = COLS * TILE_SIZE * scale;

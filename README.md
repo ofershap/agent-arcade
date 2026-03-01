@@ -1,65 +1,66 @@
-# Agent Arcade
+# Cursor Office
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue.svg)](https://www.typescriptlang.org/)
 [![VS Code](https://img.shields.io/badge/Cursor-1.85+-007ACC.svg)](https://cursor.com)
 
-A pixel art office that lives in your Cursor bottom panel. Your AI agent sits at a desk, types when it's coding, wanders around when it's idle, and celebrates when builds pass.
+Your AI agent writes your code, reads your files, runs your tests, and fixes your bugs. The least you can do is give it an office.
+
+**Warning: once you install this, a Cursor window without a tiny pixel office at the bottom will feel broken forever.**
 
 ```
-Install → Open "Agent Arcade" tab in bottom panel → done
+Install → Open "Cursor Office" in bottom panel (Cmd+Shift+.) → done
 ```
 
-> 27KB. No config. Every sprite drawn from code.
+> 27KB. No config. Every sprite drawn from code. Zero images.
 
-![Agent Arcade - pixel art office for Cursor AI agents](assets/demo.gif)
+![Cursor Office - pixel art office for Cursor AI agents](assets/demo.gif)
 
 ---
 
-## Why This Exists
+## The Pitch
 
-I spend a lot of time staring at a blinking cursor while agents do their thing. Checking if it's still running. Scrolling up to see if something happened. Tab-switching between the chat and whatever else I'm doing. It's fine, but it's disorienting. There's no peripheral signal telling me what state the agent is in.
+You outsourced your job to an AI agent. It writes code for hours while you get coffee, scroll Twitter, or pretend to be in a meeting. But does it get a desk? A window? A coffee mug? No. It works in a void. A terminal. A blinking cursor.
 
-I started thinking about how old-school games solved a version of this problem. Dwarf Fortress runs a whole economy in a grid of ASCII characters. The Sims made "person goes to desk and sits down" feel alive with nothing but pathfinding and a state machine. Tamagotchis kept people emotionally invested in a 32x16 pixel creature.
+That's not how you treat an employee.
 
-So I made one for my IDE. A tiny character with a desk, a bookshelf, a cat, and an arcade cabinet. When the agent works, the character works. When the agent is idle, the character gets a coffee, pets the cat, browses the bookshelf. When a build passes, it jumps.
+**Cursor Office** gives your agent a proper workspace. A desk with a monitor. A bookshelf. A cat. An arcade cabinet for breaks. A window with a real sky that matches your actual time of day. When it writes code, it sits at the desk and types. When it reads files, it reads files. When it finishes a build, it stands up and celebrates. When it's idle, it gets coffee, pets the cat, waters the plant.
 
-I don't need to check the terminal anymore. I just glance at the bottom panel. If the character is at the desk, things are happening. If it's wandering, the agent is done. Took me two days to stop noticing it consciously - now it's just part of the background, like music while you work.
+You don't need to check the terminal anymore. Glance at the bottom panel. Character at the desk — things are happening. Character wandering — the agent is done. You'll stop noticing it after a day, the same way you stop noticing background music. It's just ambient awareness.
+
+Your agent works hard. Give it an office.
 
 ---
 
-## What Happens
+## What the Agent Does All Day
 
-The extension watches Cursor's agent transcript files. When the agent writes code, the character walks to the desk and types. When it reads files, the bubble says so. When it finishes, it celebrates.
-
-Between tasks, the character has a life of its own. Coffee breaks, browsing the bookshelf, petting the cat, stretching. Click any object and the character notices - walks over after a short delay to check it out.
-
-| Agent doing | Character does |
+| Agent activity | What you see |
 |---|---|
-| Writing / editing code | Sits at desk, types (back to you) |
-| Reading files | At desk, speech bubble shows what |
+| Writing / editing code | Sits at desk, types away (back to you, like a real employee) |
+| Reading files | At desk, speech bubble shows which file |
 | Running commands | At desk with status bubble |
-| Idle / thinking | Wanders the office, interacts with objects |
-| Build passes | Jumps and celebrates |
+| Idle / between tasks | Wanders the office — coffee, bookshelf, cat, arcade |
+| Build passes | Jumps up and celebrates |
 
 ---
 
-## Interactive Objects
+## Office Amenities
 
-Everything in the office is clickable.
+Everything is clickable. Your agent's office is better than yours.
 
-| Object | What it does |
+| Object | What happens |
 |---|---|
-| Lamp | Toggle room lights on/off |
-| Window | Open/close curtains (sky changes with real time of day) |
-| Arcade cabinet | Cycles through mini-games on screen (Space Invaders, Tetris, Pong) |
-| Bookshelf | Shows book titles one by one |
-| Water cooler | Bubble animation |
-| Plant | Grows through 3 stages as you click (water it!) |
-| Cat | Nudges it - purrs, wanders back |
-| Coffee mug | Steam animation |
+| Lamp | Toggle room lights (the agent works late too) |
+| Window | Open/close curtains — sky matches real time of day, stars at night |
+| Arcade cabinet | Cycles through Space Invaders, Tetris, and Pong on the screen |
+| Bookshelf | Shows book titles: Clean Code, SICP, Design Patterns... |
+| Water cooler | Bubble animation — hydration matters |
+| Plant | Grows through 3 stages when you water it (click it!) |
+| Cat | Nudge it — purrs, wanders off, comes back |
+| Coffee mug | Steam rises — it's always fresh |
+| Roomba | Enters every few minutes to clean the floor. Even agents deserve a clean office |
 
-Click any object while the agent is idle and the character walks over to it after a beat.
+Click any object while idle and the character walks over to check it out.
 
 ---
 
@@ -80,16 +81,16 @@ Lamp off:
 ### From source
 
 ```bash
-git clone https://github.com/ofershap/agent-arcade.git
-cd agent-arcade
+git clone https://github.com/ofershap/cursor-office.git
+cd cursor-office
 npm install
 npm run build
 npx vsce package --no-dependencies
 ```
 
-Then in Cursor: `Cmd+Shift+P` > "Install from VSIX" > select `agent-arcade-0.1.0.vsix`.
+Then in Cursor: `Cmd+Shift+P` > "Install from VSIX" > select `cursor-office-0.1.0.vsix`.
 
-The panel appears as a tab in the bottom panel bar (next to Terminal, Output, etc).
+The panel appears as a tab in the bottom panel bar (next to Terminal, Output, etc). Or hit `Cmd+Shift+.` to jump straight there.
 
 ### From marketplace
 
@@ -99,9 +100,9 @@ Coming soon.
 
 ## How It Works
 
-Agent Arcade reads Cursor's JSONL agent transcripts at `~/.cursor/projects/<workspace>/agent-transcripts/`. It watches for file changes and figures out what the agent is doing from the transcript content.
+Cursor Office reads Cursor's JSONL agent transcripts at `~/.cursor/projects/<workspace>/agent-transcripts/`. It watches for file changes and figures out what the agent is doing.
 
-No modification to Cursor needed. Read-only, watches files Cursor already writes.
+No modification to Cursor needed. Read-only. Watches files Cursor already writes.
 
 ```
 Cursor writes JSONL transcript
@@ -117,20 +118,19 @@ Character walks to desk / wanders / celebrates
 
 ---
 
-## Idle Behavior
+## Break Room Behavior
 
-When the agent isn't working, the character cycles through activities on its own:
+When the agent isn't working, it has a life:
 
 - Standing and looking around
 - Walking to the coffee mug
-- Browsing the bookshelf (faces away from you)
+- Browsing the bookshelf
 - Petting the cat
 - Playing the arcade cabinet
-- Stretching
 - Watering the plant
 - Getting water from the cooler
 
-Each activity has its own duration with some randomness so it doesn't feel robotic. The character walks between spots at a leisurely pace, and faster when heading to the desk for work.
+Each activity has some randomness so it doesn't feel scripted. The character walks between spots at a leisurely pace, faster when heading to the desk for actual work. Just like a real employee.
 
 ---
 
@@ -149,8 +149,8 @@ Each activity has its own duration with some randomness so it doesn't feel robot
 ## Development
 
 ```bash
-git clone https://github.com/ofershap/agent-arcade.git
-cd agent-arcade
+git clone https://github.com/ofershap/cursor-office.git
+cd cursor-office
 npm install
 npm run build          # one-shot build
 npm run watch          # rebuild on save
@@ -171,28 +171,34 @@ webview/
 ├── index.ts              # Canvas setup, event handlers, message bridge
 ├── office.ts             # Renders walls, floor, lighting, z-sorting
 ├── character.ts          # Movement, idle waypoints, speech bubbles
-├── objects.ts            # All interactive objects (arcade, plant, cat...)
+├── objects.ts            # Built-in interactive objects (arcade, plant, cat...)
 ├── sprites.ts            # Programmatic pixel art sprite generation
 ├── hitTest.ts            # Click and hover detection
 ├── gameLoop.ts           # requestAnimationFrame loop
 ├── canvas.ts             # Shared drawing utils
 └── types.ts              # TypeScript interfaces
-```
 
-All sprites are generated procedurally in `sprites.ts` using `fill()` and `outline()` helpers on pixel arrays. No external image assets needed.
+plugins/
+└── roomba.ts             # Reference plugin — robot vacuum cleaner
+```
 
 ---
 
 ## Contributing
 
-Add your own objects, sprites, and office backgrounds. The extension has a plugin API that lets you register new interactive objects and custom floor/wall themes at runtime:
+Drop a `.ts` file in the [`plugins/`](plugins/) folder. The built-in Roomba ([`plugins/roomba.ts`](plugins/roomba.ts)) is the reference plugin — a self-contained robot vacuum with its own sprite, state machine, and animations.
 
 ```typescript
-window.agentArcade.registerObject(myObject);
-window.agentArcade.registerBackground(myBackground);
+import { createMyThing } from '../plugins/my-thing';
 ```
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide, including the `InteractiveObject` interface, sprite format, background renderer, and a complete example.
+Or register objects at runtime without touching source:
+
+```typescript
+window.cursorOffice.registerObject(myObject);
+```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide — plugin template, `InteractiveObject` interface, sprite helpers, backgrounds, and character attract.
 
 ---
 

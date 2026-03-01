@@ -72,18 +72,18 @@ const PAL = {
   black: '#1a1a2e',
 };
 
-function fill(s: SpriteData, x1: number, y1: number, x2: number, y2: number, c: string) {
+export function fill(s: SpriteData, x1: number, y1: number, x2: number, y2: number, c: string) {
   for (let y = y1; y <= y2; y++)
     for (let x = x1; x <= x2; x++)
       if (y >= 0 && y < s.length && x >= 0 && x < s[0].length) s[y][x] = c;
 }
 
-function outline(s: SpriteData, x1: number, y1: number, x2: number, y2: number, c: string) {
+export function outline(s: SpriteData, x1: number, y1: number, x2: number, y2: number, c: string) {
   for (let x = x1; x <= x2; x++) { if (y1 >= 0 && y1 < s.length) s[y1][x] = c; if (y2 >= 0 && y2 < s.length) s[y2][x] = c; }
   for (let y = y1; y <= y2; y++) { if (x1 >= 0 && x1 < s[0].length) s[y][x1] = c; if (x2 >= 0 && x2 < s[0].length) s[y][x2] = c; }
 }
 
-function makeSprite(w: number, h: number): SpriteData {
+export function makeSprite(w: number, h: number): SpriteData {
   return Array.from({ length: h }, () => Array(w).fill(_));
 }
 

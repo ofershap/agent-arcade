@@ -70,11 +70,10 @@ canvas.addEventListener('click', (e) => {
       state.clickCounter = { objectId: clicked, count: 1, resetTimer: CLICK_COUNTER_RESET };
     }
 
-    const obj = state.objects.find(o => o.id === clicked);
-    if (obj) {
+    const count = state.clickCounter!.count;
+    if (count >= 5) {
       const fx = mx + offsetX;
       const fy = my + offsetY;
-      const count = state.clickCounter!.count;
       const colors = ['#88ddff', '#aaffaa', '#ffdd66', '#ff88aa', '#ddaaff'];
       const color = count >= 10 ? '#ffdd00' : colors[(count - 1) % colors.length]!;
       spawnFloatingText(fx, fy - 10 * scale, `+${count}`, color);
@@ -96,6 +95,7 @@ export function removeObject(id: string) {
   state.objects = state.objects.filter(o => o.id !== id);
 }
 
+(window as Record<string, unknown>).cursorOffice = { registerObject, registerBackground, removeObject };
 (window as Record<string, unknown>).agentArcade = { registerObject, registerBackground, removeObject };
 
 canvas.addEventListener('mousemove', (e) => {

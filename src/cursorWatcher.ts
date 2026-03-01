@@ -12,40 +12,49 @@ export class CursorWatcher implements vscode.Disposable {
   private onStatusChange: (status: ParsedStatus) => void;
   private idleTimer: ReturnType<typeof setTimeout> | null = null;
   private dirWatcher: fs.FSWatcher | null = null;
+  private log: vscode.OutputChannel;
 
   constructor(onStatusChange: (status: ParsedStatus) => void) {
     this.onStatusChange = onStatusChange;
+    this.log = vscode.window.createOutputChannel('Cursor Office');
   }
 
   start(workspacePath?: string) {
-    this.transcriptsDir = this.findTranscriptsDir(workspacePath);
+    const wsPath = workspacePath || vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+    this.log.appendLine(`[start] workspace: ${wsPath}`);
+    this.transcriptsDir = this.findTranscriptsDir(wsPath);
     if (!this.transcriptsDir) {
-      console.log('[Agent Arcade] No Cursor transcripts directory found');
-      console.log('[Agent Arcade] Workspace:', workspacePath || vscode.workspace.workspaceFolders?.[0]?.uri.fsPath);
+      this.log.appendLine('[start] No transcripts directory found — watcher inactive');
       return;
     }
 
-    console.log('[Agent Arcade] Watching transcripts at:', this.transcriptsDir);
+    this.log.appendLine(`[start] Watching: ${this.transcriptsDir}`);
     this.scanAll();
 
     try {
-      this.dirWatcher = fs.watch(this.transcriptsDir, { persistent: false }, () => {
+      this.dirWatcher = fs.watch(this.transcriptsDir, { persistent: false }, (_event, filename) => {
+        this.log.appendLine(`[fs.watch] event on dir, filename=${filename}`);
         this.scanAll();
       });
       this.watchers.push(this.dirWatcher);
     } catch (e) {
-      console.log('[Agent Arcade] Cannot watch dir, falling back to polling');
+      this.log.appendLine(`[start] fs.watch failed: ${e}`);
     }
 
     this.scanInterval = setInterval(() => this.scanAll(), 2000);
   }
 
-  private findTranscriptsDir(workspacePath?: string): string | null {
-    const wsPath = workspacePath || vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-    if (!wsPath) return null;
+  private findTranscriptsDir(wsPath?: string): string | null {
+    if (!wsPath) {
+      this.log.appendLine('[find] No workspace path');
+      return null;
+    }
 
     const cursorRoot = path.join(os.homedir(), '.cursor', 'projects');
-    if (!fs.existsSync(cursorRoot)) return null;
+    if (!fs.existsSync(cursorRoot)) {
+      this.log.appendLine(`[find] Cursor root missing: ${cursorRoot}`);
+      return null;
+    }
 
     const dirName = wsPath.replace(/[^a-zA-Z0-9-]/g, '-');
     const candidates = [
@@ -53,10 +62,12 @@ export class CursorWatcher implements vscode.Disposable {
       dirName.replace(/^-+/, ''),
     ];
 
+    this.log.appendLine(`[find] candidates: ${JSON.stringify(candidates)}`);
+
     for (const candidate of candidates) {
       const transcriptsDir = path.join(cursorRoot, candidate, 'agent-transcripts');
       if (fs.existsSync(transcriptsDir)) {
-        console.log('[Agent Arcade] Found transcripts via candidate:', candidate);
+        this.log.appendLine(`[find] Match via candidate: ${candidate}`);
         return transcriptsDir;
       }
     }
@@ -68,12 +79,13 @@ export class CursorWatcher implements vscode.Disposable {
         if (!entry.isDirectory() || !entry.name.includes(wsBase)) continue;
         const transcriptsDir = path.join(cursorRoot, entry.name, 'agent-transcripts');
         if (fs.existsSync(transcriptsDir)) {
-          console.log('[Agent Arcade] Found transcripts via basename scan:', entry.name);
+          this.log.appendLine(`[find] Match via basename scan: ${entry.name}`);
           return transcriptsDir;
         }
       }
     } catch { /* ignore */ }
 
+    this.log.appendLine('[find] No match found in any candidate');
     return null;
   }
 
@@ -86,7 +98,7 @@ export class CursorWatcher implements vscode.Disposable {
         if (!entry.isDirectory()) continue;
         const jsonlPath = path.join(this.transcriptsDir, entry.name, entry.name + '.jsonl');
         if (fs.existsSync(jsonlPath) && !this.filePositions.has(jsonlPath)) {
-          console.log('[Agent Arcade] New transcript found:', entry.name);
+          this.log.appendLine(`[scan] New transcript: ${entry.name}`);
           this.watchFile(jsonlPath);
         }
         if (this.filePositions.has(jsonlPath)) {
@@ -94,14 +106,17 @@ export class CursorWatcher implements vscode.Disposable {
         }
       }
     } catch (e) {
-      console.log('[Agent Arcade] Scan error:', e);
+      this.log.appendLine(`[scan] Error: ${e}`);
     }
   }
 
   private watchFile(filePath: string) {
     try {
-      const stat = fs.statSync(filePath);
+      const fd = fs.openSync(filePath, 'r');
+      const stat = fs.fstatSync(fd);
+      fs.closeSync(fd);
       this.filePositions.set(filePath, Math.max(0, stat.size - 500));
+      this.log.appendLine(`[watch] ${path.basename(filePath)} from pos ${this.filePositions.get(filePath)}`);
 
       const watcher = fs.watch(filePath, { persistent: false }, () => {
         this.readNewContent(filePath);
@@ -110,25 +125,32 @@ export class CursorWatcher implements vscode.Disposable {
 
       this.readNewContent(filePath);
     } catch (e) {
-      console.log('[Agent Arcade] Watch error:', filePath, e);
+      this.log.appendLine(`[watch] Error: ${filePath} ${e}`);
     }
   }
 
   private readNewContent(filePath: string) {
     const prevPos = this.filePositions.get(filePath) ?? 0;
-    let stat;
+
+    let fd: number;
     try {
-      stat = fs.statSync(filePath);
+      fd = fs.openSync(filePath, 'r');
     } catch { return; }
 
-    if (stat.size <= prevPos) return;
-
     try {
-      const buf = Buffer.alloc(stat.size - prevPos);
-      const fd = fs.openSync(filePath, 'r');
+      const stat = fs.fstatSync(fd);
+      if (stat.size <= prevPos) {
+        fs.closeSync(fd);
+        return;
+      }
+
+      const bytesToRead = stat.size - prevPos;
+      const buf = Buffer.alloc(bytesToRead);
       fs.readSync(fd, buf, 0, buf.length, prevPos);
       fs.closeSync(fd);
       this.filePositions.set(filePath, stat.size);
+
+      this.log.appendLine(`[read] ${path.basename(filePath)} +${bytesToRead} bytes (${prevPos} → ${stat.size})`);
 
       const text = buf.toString('utf-8');
       const lines = text.split('\n').filter(l => l.trim());
@@ -136,13 +158,14 @@ export class CursorWatcher implements vscode.Disposable {
       for (const line of lines) {
         const status = parseTranscriptLine(line);
         if (status) {
-          console.log('[Agent Arcade] Activity:', status.activity, status.statusText);
+          this.log.appendLine(`[activity] ${status.activity}: ${status.statusText}`);
           this.onStatusChange(status);
           this.resetIdleTimer();
         }
       }
     } catch (e) {
-      console.log('[Agent Arcade] Read error:', e);
+      try { fs.closeSync(fd); } catch {}
+      this.log.appendLine(`[read] Error: ${e}`);
     }
   }
 
@@ -161,5 +184,6 @@ export class CursorWatcher implements vscode.Disposable {
     if (this.scanInterval) clearInterval(this.scanInterval);
     if (this.idleTimer) clearTimeout(this.idleTimer);
     this.filePositions.clear();
+    this.log.dispose();
   }
 }

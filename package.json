@@ -1,43 +1,55 @@
 {
-  "name": "agent-arcade",
-  "displayName": "Agent Arcade",
-  "description": "A living pixel art office for your Cursor AI agent — watch it work, click things, discover easter eggs",
+  "name": "cursor-office",
+  "displayName": "Cursor Office",
+  "description": "Your AI agent deserves an office. A pixel art workspace where your Cursor agent types, reads, celebrates, and takes coffee breaks.",
   "version": "0.1.0",
   "publisher": "ofershap",
   "license": "MIT",
+  "icon": "assets/icon.png",
+  "galleryBanner": {
+    "color": "#1e1e32",
+    "theme": "dark"
+  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ofershap/agent-arcade"
+    "url": "https://github.com/ofershap/cursor-office"
   },
   "engines": {
     "vscode": "^1.85.0"
   },
   "categories": ["Other", "Visualization"],
-  "keywords": ["cursor", "agent", "pixel-art", "ai", "companion", "interactive", "office", "animation", "coding-assistant", "pet"],
+  "keywords": ["cursor", "agent", "pixel-art", "ai", "companion", "interactive", "office", "coding-assistant", "cursor-office", "agent-office"],
   "activationEvents": ["*"],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "agentArcade.show",
-        "title": "Agent Arcade: Show Office"
+        "command": "cursorOffice.show",
+        "title": "Cursor Office: Show"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "cursorOffice.show",
+        "key": "ctrl+shift+.",
+        "mac": "cmd+shift+."
       }
     ],
     "viewsContainers": {
       "panel": [
         {
-          "id": "agentArcade",
-          "title": "Agent Arcade",
-          "icon": "$(game)"
+          "id": "cursorOffice",
+          "title": "Cursor Office",
+          "icon": "$(home)"
         }
       ]
     },
     "views": {
-      "agentArcade": [
+      "cursorOffice": [
         {
           "type": "webview",
-          "id": "agentArcade.office",
-          "name": "Agent Arcade"
+          "id": "cursorOffice.panel",
+          "name": "💼 Office"
         }
       ]
     }

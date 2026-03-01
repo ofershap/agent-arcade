@@ -2,8 +2,8 @@ import * as vscode from 'vscode';
 import { CursorWatcher } from './cursorWatcher';
 import { ParsedStatus } from './transcriptParser';
 
-export class AgentArcadePanelProvider implements vscode.WebviewViewProvider {
-  public static readonly viewType = 'agentArcade.office';
+export class CursorOfficePanelProvider implements vscode.WebviewViewProvider {
+  public static readonly viewType = 'cursorOffice.panel';
 
   private view?: vscode.WebviewView;
   private watcher?: CursorWatcher;
@@ -24,7 +24,7 @@ export class AgentArcadePanelProvider implements vscode.WebviewViewProvider {
 
     webviewView.webview.html = this.getHtml(webviewView.webview);
 
-    console.log('[Agent Arcade] Webview resolved, starting watcher');
+    console.log('[Cursor Office] Webview resolved, starting watcher');
 
     this.watcher = new CursorWatcher((status: ParsedStatus) => {
       this.sendStatus(status);
@@ -33,12 +33,12 @@ export class AgentArcadePanelProvider implements vscode.WebviewViewProvider {
 
     webviewView.webview.onDidReceiveMessage((msg) => {
       if (msg.type === 'webviewReady') {
-        console.log('[Agent Arcade] Webview ready signal received');
+        console.log('[Cursor Office] Webview ready signal received');
       }
     });
 
     webviewView.onDidDispose(() => {
-      console.log('[Agent Arcade] Webview disposed');
+      console.log('[Cursor Office] Webview disposed');
       this.watcher?.dispose();
       this.watcher = undefined;
     });
