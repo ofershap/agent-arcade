@@ -31,106 +31,103 @@
 
 ---
 
-```
-Install → Open "Cursor Office" in bottom panel (Cmd+Shift+.) → done
-```
-
 ![Cursor Office - pixel art office for Cursor AI agents](assets/demo.gif)
 
----
-
-## The Pitch
-
-You outsourced your job to an AI agent. It writes code for hours while you get coffee, scroll Twitter, or pretend to be in a meeting. But does it get a desk? A window? A coffee mug? No. It works in a void. A terminal. A blinking cursor.
-
-That's not how you treat an employee.
-
-**Cursor Office** gives your agent a proper workspace. A desk with a monitor. A bookshelf. A cat. An arcade cabinet for breaks. A window with a real sky that matches your actual time of day. When it writes code, it sits at the desk and types. When it reads files, it reads files. When it finishes a build, it stands up and celebrates. When it's idle, it gets coffee, pets the cat, waters the plant.
-
-You don't need to check the terminal anymore. Glance at the bottom panel. Character at the desk — things are happening. Character wandering — the agent is done. You'll stop noticing it after a day, the same way you stop noticing background music. It's just ambient awareness.
-
-Your agent works hard. Give it an office.
+<p align="center"><em>Every sprite is drawn from code. Zero image files. 27KB total.</em></p>
 
 ---
 
-## What the Agent Does All Day
+## Your Agent Works in a Void
 
-| Agent activity | What you see |
+You outsourced your job to an AI agent. It writes code for hours while you get coffee, scroll Twitter, or pretend to be in a meeting. But does it get a desk? A window? A coffee mug?
+
+No. It works in a void. A terminal. A blinking cursor. That's not how you treat an employee.
+
+**Cursor Office** gives your agent a proper workspace — a desk with a monitor, a bookshelf, a cat, an arcade cabinet for breaks, and a window with a real sky that matches your actual time of day. When it writes code, it sits at the desk and types. When it finishes a build, it stands up and celebrates. When it's idle, it gets coffee, pets the cat, waters the plant.
+
+Glance at the bottom panel. Character at the desk — things are happening. Character wandering — the agent is done. It's ambient awareness, like background music you stop noticing after a day.
+
+---
+
+## What You Actually See
+
+| Your agent is... | The office shows... |
 |---|---|
-| Writing / editing code | Sits at desk, types away (back to you, like a real employee) |
+| Writing / editing code | Character sits at desk, types away (back to you, like a real employee) |
 | Reading files | At desk, speech bubble shows which file |
-| Running commands | At desk with status bubble |
+| Running commands | At desk with terminal status bubble |
 | Idle / between tasks | Wanders the office — coffee, bookshelf, cat, arcade |
 | Build passes | Jumps up and celebrates |
 
 ---
 
-## Office Amenities
+## Everything Is Clickable
 
-Everything is clickable. Your agent's office is better than yours.
+Your agent's office is better than yours.
 
 | Object | What happens |
 |---|---|
-| Lamp | Toggle room lights (the agent works late too) |
-| Window | Open/close curtains — sky matches real time of day, stars at night |
-| Arcade cabinet | Cycles through Space Invaders, Tetris, and Pong on the screen |
-| Bookshelf | Shows book titles: Clean Code, SICP, Design Patterns... |
-| Water cooler | Bubble animation — hydration matters |
-| Plant | Grows through 3 stages when you water it (click it!) |
-| Cat | Nudge it — purrs, wanders off, comes back |
-| Coffee mug | Steam rises — it's always fresh |
-| Roomba | Enters every few minutes to clean the floor. Even agents deserve a clean office |
+| 💡 Lamp | Toggle room lights — the agent works late too |
+| 🪟 Window | Open/close curtains — sky matches real time of day, stars at night |
+| 🕹️ Arcade cabinet | Cycles through Space Invaders, Tetris, and Pong on the tiny screen |
+| 📚 Bookshelf | Shows book titles: Clean Code, SICP, Design Patterns... |
+| 💧 Water cooler | Bubble animation — hydration matters |
+| 🌱 Plant | Grows through 3 stages when you water it (click it!) |
+| 🐱 Cat | Nudge it — purrs, wanders off, comes back |
+| ☕ Coffee mug | Steam rises — it's always fresh |
+| 🤖 Roomba | Drifts in every few minutes to clean the floor |
 
 Click any object while idle and the character walks over to check it out.
 
 ---
 
-## Screenshots
+## Idle Time Is Not Wasted Time
+
+When the agent isn't working, it has a life. It stands around, grabs coffee, browses the bookshelf, pets the cat, plays the arcade, waters the plant, gets water from the cooler. Each activity has randomness baked in so it never feels scripted. The character strolls between spots at a leisurely pace, but rushes to the desk when real work comes in. Just like a real employee.
+
+---
 
 | Idle | Working | Celebrating |
 |---|---|---|
 | ![idle](assets/idle.png) | ![working](assets/working.png) | ![celebrating](assets/celebrate.png) |
 
-Lamp off:
-
-![dark mode](assets/dark.png)
+| Lamp off |
+|---|
+| ![dark mode](assets/dark.png) |
 
 ---
 
 ## Install
+
+### From marketplace
+
+Coming soon.
 
 ### From source
 
 ```bash
 git clone https://github.com/ofershap/cursor-office.git
 cd cursor-office
-npm install
-npm run build
+npm install && npm run build
 npx vsce package --no-dependencies
 ```
 
-Then in Cursor: `Cmd+Shift+P` > "Install from VSIX" > select `cursor-office-0.1.0.vsix`.
+Then in Cursor: `Cmd+Shift+P` → "Install from VSIX" → select `cursor-office-0.1.0.vsix`.
 
-The panel appears as a tab in the bottom panel bar (next to Terminal, Output, etc). Or hit `Cmd+Shift+.` to jump straight there.
-
-### From marketplace
-
-Coming soon.
+The office appears as a tab in the bottom panel bar (next to Terminal, Output, etc). Or hit **`Cmd+Shift+.`** to jump straight there.
 
 ---
 
-## How It Works
+## Zero Modification Required
 
-Cursor Office reads Cursor's JSONL agent transcripts at `~/.cursor/projects/<workspace>/agent-transcripts/`. It watches for file changes and figures out what the agent is doing.
-
-No modification to Cursor needed. Read-only. Watches files Cursor already writes.
+Cursor Office reads Cursor's JSONL agent transcripts at `~/.cursor/projects/<workspace>/agent-transcripts/`. It watches for file changes and figures out what the agent is doing. No hacks, no patches, no API keys. Read-only. Watches files Cursor already writes.
 
 ```
 Cursor writes JSONL transcript
     ↓
 FileWatcher detects change
     ↓
-TranscriptParser infers activity (typing/reading/running/idle)
+TranscriptParser infers activity (typing / reading / running / idle)
     ↓
 postMessage to webview
     ↓
@@ -139,31 +136,16 @@ Character walks to desk / wanders / celebrates
 
 ---
 
-## Break Room Behavior
+## Built Different
 
-When the agent isn't working, it has a life:
-
-- Standing and looking around
-- Walking to the coffee mug
-- Browsing the bookshelf
-- Petting the cat
-- Playing the arcade cabinet
-- Watering the plant
-- Getting water from the cooler
-
-Each activity has some randomness so it doesn't feel scripted. The character walks between spots at a leisurely pace, faster when heading to the desk for actual work. Just like a real employee.
-
----
-
-## Tech Stack
-
-| Component | What |
+| | |
 |---|---|
-| Extension host | VS Code / Cursor Extension API |
-| Rendering | Canvas 2D, requestAnimationFrame |
-| Sprites | Procedural pixel art (no external images) |
-| Build | esbuild, single-file bundle |
-| Language | TypeScript (strict) |
+| **Extension host** | VS Code / Cursor Extension API |
+| **Rendering** | Canvas 2D, requestAnimationFrame, 60fps |
+| **Sprites** | Procedural pixel art — every pixel drawn from code, zero image files |
+| **Build** | esbuild, single-file bundle, 27KB |
+| **Language** | TypeScript (strict) |
+| **Plugin system** | Drop a `.ts` file in `plugins/` — [see the Roomba](plugins/roomba.ts) |
 
 ---
 
@@ -177,9 +159,10 @@ npm run build          # one-shot build
 npm run watch          # rebuild on save
 ```
 
-Press F5 in Cursor/VS Code to launch the Extension Development Host with the extension loaded.
+Press F5 in Cursor/VS Code to launch the Extension Development Host.
 
-### Project structure
+<details>
+<summary>Project structure</summary>
 
 ```
 src/
@@ -192,7 +175,7 @@ webview/
 ├── index.ts              # Canvas setup, event handlers, message bridge
 ├── office.ts             # Renders walls, floor, lighting, z-sorting
 ├── character.ts          # Movement, idle waypoints, speech bubbles
-├── objects.ts            # Built-in interactive objects (arcade, plant, cat...)
+├── objects.ts            # Built-in interactive objects
 ├── sprites.ts            # Programmatic pixel art sprite generation
 ├── hitTest.ts            # Click and hover detection
 ├── gameLoop.ts           # requestAnimationFrame loop
@@ -203,29 +186,27 @@ plugins/
 └── roomba.ts             # Reference plugin — robot vacuum cleaner
 ```
 
+</details>
+
 ---
 
 ## Contributing
 
-Drop a `.ts` file in the [`plugins/`](plugins/) folder. The built-in Roomba ([`plugins/roomba.ts`](plugins/roomba.ts)) is the reference plugin — a self-contained robot vacuum with its own sprite, state machine, and animations.
+Drop a `.ts` file in the [`plugins/`](plugins/) folder. The built-in Roomba ([`plugins/roomba.ts`](plugins/roomba.ts)) is the reference — a self-contained robot vacuum with its own sprite, state machine, and animations. See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide.
 
 ```typescript
+// Your plugin
 import { createMyThing } from '../plugins/my-thing';
-```
 
-Or register objects at runtime without touching source:
-
-```typescript
+// Or register at runtime
 window.cursorOffice.registerObject(myObject);
 ```
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide — plugin template, `InteractiveObject` interface, sprite helpers, backgrounds, and character attract.
 
 ---
 
 ## Sponsor
 
-Want your brand in the office? A mug with your logo, a poster on the wall, a gadget on the desk. Pixel art, fully interactive, seen by every user every session. Reach out on [LinkedIn](https://linkedin.com/in/ofershap) or open an issue.
+Want your brand in the office? A mug with your logo, a poster on the wall, a gadget on the desk. Pixel art, fully interactive, seen by every user every session. [Reach out](https://linkedin.com/in/ofershap) or open an issue.
 
 ---
 
