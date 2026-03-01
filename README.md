@@ -147,20 +147,6 @@ Lamp off:
 
 ---
 
-## Differences from Pixel Agents
-
-[Pixel Agents](https://github.com/pablodelucca/pixel-agents) is a similar concept for Claude Code terminals. Agent Arcade is different in a few ways:
-
-- Cursor-native (reads Cursor transcripts, not Claude Code terminals)
-- Single character in a fixed office (not multi-agent with spawning)
-- All art is procedural code, no paid sprite sheets or external assets
-- Interactive objects with click-to-attract behavior
-- Dynamic window with real-time day/night cycle
-- Arcade cabinet with playable mini-game animations
-- 27KB bundled, zero runtime dependencies
-
----
-
 ## Author
 
 [![Made by ofershap](https://gitshow.dev/api/card/ofershap)](https://gitshow.dev/ofershap)
