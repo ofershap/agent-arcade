@@ -41,7 +41,7 @@
 
 You outsourced your job to an AI agent. It writes code for hours while you get coffee, scroll Twitter, or pretend to be in a meeting. But does it get a desk? A window? A coffee mug?
 
-No. It works in a void. A terminal. A blinking cursor. That's not how you treat an employee.
+No. It works in the shades. A terminal. A blinking cursor. That's not how you treat an employee.
 
 **Cursor Office** gives your agent a proper workspace — a desk with a monitor, a bookshelf, a cat, an arcade cabinet for breaks, and a window with a real sky that matches your actual time of day. When it writes code, it sits at the desk and types. When it finishes a build, it stands up and celebrates. When it's idle, it gets coffee, pets the cat, waters the plant.
 
