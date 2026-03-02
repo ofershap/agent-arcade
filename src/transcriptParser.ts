@@ -94,3 +94,85 @@ export function parseTranscriptLine(line: string): ParsedStatus | null {
     return null;
   }
 }
+
+/**
+ * Parses a flat-text transcript block (Cursor on Windows / recent versions).
+ *
+ * Cursor stores transcripts as plain-text `.txt` files directly inside
+ * `agent-transcripts/`, using a block format like:
+ *
+ *   user:
+ *   <user_query>...</user_query>
+ *
+ *   assistant:
+ *   [Thinking] ...
+ *   [Tool call] Read
+ *   [Tool result] ...
+ *
+ * This function receives a multi-line chunk of new content appended to the
+ * file and returns the first meaningful status inferred from it.
+ */
+export function parseFlatTxtChunk(chunk: string): ParsedStatus | null {
+  const lines = chunk.split('\n');
+  let currentRole: 'user' | 'assistant' | null = null;
+  let assistantBuffer = '';
+
+  for (const raw of lines) {
+    const line = raw.trimEnd();
+
+    if (line === 'user:') {
+      if (assistantBuffer.trim()) {
+        const status = inferActivityFromText(assistantBuffer.trim());
+        if (status) return status;
+      }
+      currentRole = 'user';
+      assistantBuffer = '';
+      continue;
+    }
+
+    if (line === 'assistant:') {
+      currentRole = 'assistant';
+      assistantBuffer = '';
+      continue;
+    }
+
+    if (currentRole === 'user' && line.trim()) {
+      return { activity: 'idle', statusText: null };
+    }
+
+    if (currentRole === 'assistant' && line.trim()) {
+      // [Tool call] lines give rich activity signals
+      const toolCallMatch = line.match(/^\[Tool call\]\s+(\w+)/);
+      if (toolCallMatch) {
+        const tool = toolCallMatch[1]!.toLowerCase();
+        if (/^(read|glob|grep|semanticsearch)$/.test(tool)) {
+          return { activity: 'reading', statusText: 'Working...' };
+        }
+        if (/^(shell|bash)$/.test(tool)) {
+          return { activity: 'running', statusText: 'Working...' };
+        }
+        if (/^(strreplace|write|editnotebook|delete)$/.test(tool)) {
+          return { activity: 'editing', statusText: 'Working...' };
+        }
+        if (/^(task)$/.test(tool)) {
+          return { activity: 'phoning', statusText: 'Delegating...' };
+        }
+        return { activity: 'typing', statusText: 'Working...' };
+      }
+
+      // Accumulate [Thinking] and plain assistant text for inference
+      const thinkingMatch = line.match(/^\[Thinking\]\s*(.*)/);
+      if (thinkingMatch) {
+        assistantBuffer += (thinkingMatch[1] ?? '') + ' ';
+      } else if (!line.startsWith('[Tool result]') && !line.startsWith('[Tool')) {
+        assistantBuffer += line + ' ';
+      }
+    }
+  }
+
+  if (assistantBuffer.trim()) {
+    return inferActivityFromText(assistantBuffer.trim());
+  }
+
+  return null;
+}
