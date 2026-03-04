@@ -17,9 +17,25 @@
   "engines": {
     "vscode": "^1.85.0"
   },
-  "categories": ["Other", "Visualization"],
-  "keywords": ["cursor", "agent", "pixel-art", "ai", "companion", "interactive", "office", "coding-assistant", "cursor-office", "agent-office"],
-  "activationEvents": ["*"],
+  "categories": [
+    "Other",
+    "Visualization"
+  ],
+  "keywords": [
+    "cursor",
+    "agent",
+    "pixel-art",
+    "ai",
+    "companion",
+    "interactive",
+    "office",
+    "coding-assistant",
+    "cursor-office",
+    "agent-office"
+  ],
+  "activationEvents": [
+    "*"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
@@ -65,12 +81,15 @@
   "scripts": {
     "build": "node esbuild.mjs",
     "watch": "node esbuild.mjs --watch",
-    "package": "vsce package --allow-star-activation"
+    "package": "vsce package --allow-star-activation",
+    "context:lint": "ai-context-kit lint",
+    "context:measure": "ai-context-kit measure"
   },
   "devDependencies": {
     "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^3.0.0",
+    "ai-context-kit": "^0.1.1",
     "esbuild": "^0.24.0",
-    "typescript": "^5.7.0",
-    "@vscode/vsce": "^3.0.0"
+    "typescript": "^5.7.0"
   }
 }
